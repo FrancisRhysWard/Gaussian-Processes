@@ -358,9 +358,12 @@ class GaussianProcess(object):
 
         mean, std = self.get_gp_mean_std(data_points_test)
 
-        pdf = 1 / (std*np.sqrt(2*np.pi)) * np.exp(-0.5*((evaluations_test - mean)/std)**2)
+        n, l = data_points_test.shape
 
-        return np.log(pdf.sum())
+        exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(np.diag(std **2) ) @ (evaluations_test - mean)))
+        pdf = np.linalg.det(np.diag(std))*(2*np.pi)**(-n/2) * exponential
+
+        return np.log(pdf).sum()
 
     def plot_with_samples(self,
                           number_samples: int,
