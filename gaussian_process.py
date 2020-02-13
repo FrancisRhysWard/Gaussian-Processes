@@ -356,7 +356,11 @@ class GaussianProcess(object):
         :return: the computed log predictive density on the test set.
         """
 
-        # TODO
+        mean, std = self.get_gp_mean_std(data_points_test)
+
+        pdf = 1 / (std*np.sqrt(2*np.pi)) * np.exp(-0.5*((evaluations_test - mean)/std)**2)
+
+        return np.log(pdf.sum())
 
     def plot_with_samples(self,
                           number_samples: int,
