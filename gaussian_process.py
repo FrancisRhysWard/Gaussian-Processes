@@ -178,7 +178,15 @@ class GaussianProcess(object):
         - log_length_scale
         - log_noise_scale
         """
-        # TODO
+        self.set_kernel_parameters(log_amplitude, log_length_scale, log_noise_scale)
+
+        K = self._covariance_matrix
+        K_noise = K + self._kernel.noise_scale_squared * np.identity(K.shape[0])
+        K_noise_inv = np.linalg.inv(K_noise)
+        y = self._array_objective_function_values
+        n = y.shape[0]
+
+        return (0.5 * np.transpose(y) @ K_noise_inv @ y + 0.5 * np.log(np.linalg.det(K_noise)) + n / 2 * np.log(2 * np.pi))[0,0]
 
     def get_gradient_negative_log_marginal_likelihood(self,
                                                       log_amplitude: float,
@@ -265,7 +273,20 @@ class GaussianProcess(object):
         - mean = array of respective means predicted at the gaussian process for each point
         - covariance matrix = k(new_data_points, new_data_points) where k refers to the kernel function.
         """
-        # TODO
+
+        m, std = self.get_gp_mean_std(new_data_points)
+
+        if self._array_dataset.shape == (0,):
+            return np.random.multivariate_normal(m.flatten(), self._kernel(new_data_points, new_data_points))
+
+        noise_scale = np.exp(self._kernel.log_noise_scale)
+        k = self._kernel(self._array_dataset, new_data_points)
+        cv = self._covariance_matrix
+        inv = np.linalg.inv((cv + np.eye(cv.shape[0])*noise_scale**2))
+
+        cv = self._kernel(new_data_points, new_data_points) - (np.transpose(k) @ inv @ k)
+
+        return np.random.multivariate_normal(m.flatten(), cv)
 
     def get_gp_mean_std(self,
                         new_data_points: np.ndarray
@@ -282,7 +303,24 @@ class GaussianProcess(object):
         - a column numpy array of size n x 1 with the estimation of the predicted standard deviation of the gaussian process for
         all the points in data_points
         """
-        # TODO
+
+        m_prior = np.zeros(new_data_points.shape)
+        var_prior = np.diag(self._kernel(new_data_points, new_data_points))
+
+        if self._array_dataset.shape == (0,):
+            return m_prior, np.sqrt(var_prior)
+
+        noise_scale = np.exp(self._kernel.log_noise_scale)
+        k = self._kernel(self._array_dataset, new_data_points)
+        cv = self._covariance_matrix
+        inv = np.linalg.inv((cv + np.eye(cv.shape[0])*noise_scale**2))
+
+        m_post =  np.transpose(k) @ inv @ self._array_objective_function_values
+
+
+        var_post = np.diag(self._kernel(new_data_points, new_data_points) - (np.transpose(k) @ inv @ k))
+
+        return m_post, np.sqrt(var_post)
 
     def get_mse(self,
                 data_points_test: np.ndarray,

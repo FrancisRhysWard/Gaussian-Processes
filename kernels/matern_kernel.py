@@ -11,4 +11,17 @@ class MaternKernel(Kernel):
         :return: numpy array of size n_1 x n_2 for which the value at position (i, j) corresponds to the value of
         k(x_i, y_j), where k represents the kernel used.
         """
-        # TODO
+
+        s2 = np.exp(self.log_amplitude * 2)
+
+        l = np.exp(self.log_length_scale)
+
+        norm = np.zeros((X.shape[0], Y.shape[0]))
+
+        for i, x in enumerate(X):
+            for j, y in enumerate(Y):
+                norm[i,j] = np.linalg.norm(x-y)
+
+        temp = np.sqrt(3) * norm / l
+
+        return s2 * (1 + temp) * np.exp(- temp)
