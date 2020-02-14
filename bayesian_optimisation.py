@@ -92,7 +92,7 @@ class BayesianOptimisation(object):
         gp.add_data_point(arg_max_acquisition_function, self._objective_function)
         gp.optimise_parameters()
 
-        #self._acquisition_function._evaluate(gp, )
+        return self._acquisition_function.compute_arg_max(gp, self._objective_function)
 
     def get_best_data_point(self) -> np.ndarray:
         index_best_data_point = np.argmin(self._gaussian_process.array_objective_function_values)
