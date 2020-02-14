@@ -24,14 +24,11 @@ class ExpectedImprovement(AcquisitionFunction):
         mean, std = gaussian_process.get_gp_mean_std(data_points)
         n, l = mean.shape
 
-        #f_best = np.min(mean)
         f_best = np.min(gaussian_process._array_objective_function_values)
         gamma = (f_best - mean)/std
         cdf = norm.cdf(gamma)
 
         expected_improvement = std*(gamma*cdf + norm.pdf(gamma))
 
-        print(expected_improvement)
-        print(expected_improvement.shape)
         return expected_improvement
         # TODO

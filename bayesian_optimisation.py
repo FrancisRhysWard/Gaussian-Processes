@@ -89,8 +89,9 @@ class BayesianOptimisation(object):
         """
 
         gp = self._gaussian_process
-        gp.add_data_point(arg_max_acquisition_function, self._objective_function)
-        gp.optimise_parameters()
+        gp.add_data_point(arg_max_acquisition_function, self._objective_function.evaluate(arg_max_acquisition_function))
+        optimal_params = gp.optimise_parameters().x
+        gp.set_kernel_parameters(optimal_params[0], optimal_params[1], optimal_params[2])
 
         return self._acquisition_function.compute_arg_max(gp, self._objective_function)
 
