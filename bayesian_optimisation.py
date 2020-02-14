@@ -87,7 +87,12 @@ class BayesianOptimisation(object):
         :param arg_max_acquisition_function: the previously computed argmax of the acquisition function
         :return: the next computed arg_max of the acquisition function after having updated the Gaussian Process
         """
-        # TODO
+
+        gp = self._gaussian_process
+        gp.add_data_point(arg_max_acquisition_function, self._objective_function)
+        gp.optimise_parameters()
+
+        self._acquisition_function._evaluate(gp, )
 
     def get_best_data_point(self) -> np.ndarray:
         index_best_data_point = np.argmin(self._gaussian_process.array_objective_function_values)
