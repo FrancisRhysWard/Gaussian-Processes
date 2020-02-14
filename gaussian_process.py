@@ -320,7 +320,7 @@ class GaussianProcess(object):
 
         var_post = np.diag(self._kernel(new_data_points, new_data_points) - (np.transpose(k) @ inv @ k))
 
-        return m_post, np.sqrt(var_post)
+        return m_post, np.sqrt(var_post).reshape((-1,1))
 
     def get_mse(self,
                 data_points_test: np.ndarray,
@@ -357,25 +357,19 @@ class GaussianProcess(object):
         """
 
         mean, std = self.get_gp_mean_std(data_points_test)
-        n, l = data_points_test.shape
-
-        ### add noise to std to avoid numerical instability
-        ## noise_scale = np.exp(self._kernel.log_noise_scale)
-        #noise_scale = self._kernel.noise_scale_squared
-        #std = np.sqrt(np.diag(std**2) + np.eye(n)*noise_scale)
-
-
-
-
-        std = np.diag(np.sqrt(np.square(std) + self._kernel.noise_scale_squared))
-        exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(std**2 ) @ (evaluations_test - mean)))
-        pdf = np.linalg.det(std)*(2*np.pi)**(-n/2) * exponential
-
-        return np.log(pdf).sum()
+        print('&&')
+        print(std.shape)
+        std = np.sqrt(np.square(std) + self._kernel.noise_scale_squared)
 
         #return float(np.sum([norm.logpdf(y_i, mean_i, std_i) for y_i, mean_i, std_i in zip(evaluations_test, mean, std)]))
 
+        from scipy.stats import multivariate_normal
 
+        print(mean)
+        print(mean.shape)
+        print(evaluations_test.shape)
+        print(std.shape)
+        return float(np.sum(multivariate_normal.logpdf(evaluations_test.flatten(), mean.flatten(), std.flatten())))
 
     def plot_with_samples(self,
                           number_samples: int,
