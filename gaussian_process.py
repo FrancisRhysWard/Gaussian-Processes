@@ -357,18 +357,24 @@ class GaussianProcess(object):
         """
 
         mean, std = self.get_gp_mean_std(data_points_test)
-        n, l = data_points_test.shape
+        #n, l = data_points_test.shape
 
-        ## add noise to std to avoid numerical instability
-        # noise_scale = np.exp(self._kernel.log_noise_scale)
-        noise_scale = self._kernel.noise_scale_squared
-        std = np.sqrt(np.diag(std**2) + np.eye(n)*noise_scale)
+        ### add noise to std to avoid numerical instability
+        ## noise_scale = np.exp(self._kernel.log_noise_scale)
+        #noise_scale = self._kernel.noise_scale_squared
+        #std = np.sqrt(np.diag(std**2) + np.eye(n)*noise_scale)
 
 
-        exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(std**2 ) @ (evaluations_test - mean)))
-        pdf = np.linalg.det(std)*(2*np.pi)**(-n/2) * exponential
+        #exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(std**2 ) @ (evaluations_test - mean)))
+        #pdf = np.linalg.det(std)*(2*np.pi)**(-n/2) * exponential
 
-        return np.log(pdf).sum()
+        #return np.log(pdf).sum()
+
+        std = np.sqrt(np.square(std) + self._kernel.noise_scale_squared)
+
+        return float(np.sum([norm.logpdf(y_i, mean_i, std_i) for y_i, mean_i, std_i in zip(evaluations_test, mean, std)]))
+
+
 
     def plot_with_samples(self,
                           number_samples: int,
