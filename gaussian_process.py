@@ -361,10 +361,6 @@ class GaussianProcess(object):
         # add noise to std to avoid numerical instability
         std = np.sqrt(np.square(std) + self._kernel.noise_scale_squared)
 
-        #return float(np.sum([norm.logpdf(y_i, mean_i, std_i) for y_i, mean_i, std_i in zip(evaluations_test, mean, std)]))
-
-        #from scipy.stats import multivariate_normal
-
         return float(np.sum(norm.logpdf(evaluations_test.flatten(), mean.flatten(), std.flatten())))
 
     def plot_with_samples(self,
