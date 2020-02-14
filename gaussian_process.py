@@ -357,11 +357,15 @@ class GaussianProcess(object):
         """
 
         mean, std = self.get_gp_mean_std(data_points_test)
-
         n, l = data_points_test.shape
 
-        exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(np.diag(std **2) ) @ (evaluations_test - mean)))
-        pdf = np.linalg.det(np.diag(std))*(2*np.pi)**(-n/2) * exponential
+        ## add noise to std to avoid numerical instability
+        noise_scale = np.exp(self._kernel.log_noise_scale)
+        std = np.diag(std) + np.eye(n)*noise_scale
+
+
+        exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(std**2 ) @ (evaluations_test - mean)))
+        pdf = np.linalg.det(std)*(2*np.pi)**(-n/2) * exponential
 
         return np.log(pdf).sum()
 

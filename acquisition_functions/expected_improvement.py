@@ -21,8 +21,14 @@ class ExpectedImprovement(AcquisitionFunction):
         each point
         """
 
+        mean, std = gaussian_process.get_gp_mean_std(data_points)
+
+        f_best = np.min(mean)
+        gamma = (f_best - mean)/std
+
+        cdf = norm.cdf(gamma)
+
+        expected_improvement = std*(gamma*cdf + np..random.normal())
+
+        return expected_improvement
         # TODO
-
-
-
-
