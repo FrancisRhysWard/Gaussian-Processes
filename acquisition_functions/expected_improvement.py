@@ -29,7 +29,7 @@ class ExpectedImprovement(AcquisitionFunction):
         gamma = (f_best - mean)/std
         cdf = norm.cdf(gamma)
 
-        expected_improvement = std*(gamma*cdf + gamma)
+        expected_improvement = std*(gamma*cdf + norm.pdf(gamma))
 
         print(expected_improvement)
         print(expected_improvement.shape)
