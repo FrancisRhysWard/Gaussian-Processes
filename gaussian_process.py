@@ -360,8 +360,9 @@ class GaussianProcess(object):
         n, l = data_points_test.shape
 
         ## add noise to std to avoid numerical instability
-        noise_scale = np.exp(self._kernel.log_noise_scale)
-        std = np.diag(std) + np.eye(n)*noise_scale
+        # noise_scale = np.exp(self._kernel.log_noise_scale)
+        noise_scale = self._kernel.noise_scale_squared
+        std = np.sqrt(np.diag(std**2) + np.eye(n)*noise_scale)
 
 
         exponential = np.exp(-0.5*(np.transpose(evaluations_test - mean) @ np.linalg.inv(std**2 ) @ (evaluations_test - mean)))
